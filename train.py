@@ -93,3 +93,16 @@ def classify_image(image_path, topk=5):
         results = zip(probs,classes)
         
         return results
+    
+def read_categories():
+        """
+        Description:
+            read the categories of images
+        Returns:
+            jfile - json file of the categories otherwise if not found return None
+        """
+        if (args.category_names is not None):
+            cat_file = args.category_names
+            jfile = json.loads(open(cat_file).read())
+            return jfile
+        return None
