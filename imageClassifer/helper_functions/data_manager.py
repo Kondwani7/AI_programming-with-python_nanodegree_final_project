@@ -49,3 +49,22 @@ def load_data(path):
     print("Finished loading and preprocessing data.")
     
     return train_data, trainloader, validloader, testloader
+
+def process_image(image):
+    """
+    Description:
+        processes (resize, crop and normalize)an image for the model as a numpy array
+    Args:
+        image - PIL imge
+    Returns:
+        a numpy array of transformed images, split as train, validation and test
+    """
+    image = Image.open(image)
+    
+    image_transform = transforms.Compose([transforms.Resize(255),
+                                                 transforms.CenterCrop(224),
+                                                 transforms.ToTensor(),
+                                                 transforms.Normalize([0.485, 0.456, 0.406],
+                                                                      [0.229, 0.224, 0.225])])
+    
+    return image_transform(image)
