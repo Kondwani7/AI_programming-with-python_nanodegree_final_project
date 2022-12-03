@@ -163,3 +163,47 @@ def evaluate_model(model, testloader, criterion, gpu):
     running_loss = 0
     
     print("Finished testing neural network.")
+    
+def save_model(model, architecture, hidden_units, epochs, learning_rate, save_dir):
+    """
+        Description:
+            saves model
+    Args:
+        model: model being saved
+        architecture: params of model
+        hidden_units: hidden layers design of model
+        epochs: the number of times it is trained to achieve a lower gradient descent
+        learning_rate: proposed rate at which the model descends
+        save_dir: directory model is saved to
+    """
+    print("Saving model ... epochs: {}, learning_rate: {}, save_dir: {}".format(epochs, learning_rate, save_dir))
+    checkpoint = {
+        'architecture': architecture,
+        'hidden_units': hidden_units,
+        'epochs': epochs,
+        'learning_rate': learning_rate,
+        'model_state_dict': model.state_dict(),
+        'class_to_idx': model.class_to_idx
+    }
+    
+    checkpoint_path = save_dir + "checkpoint.pth"
+
+    torch.save(checkpoint, checkpoint_path)
+    
+    print("Model saved to {}".format(checkpoint_path))
+    
+def load_model(filepath):
+    """
+    Description:
+        load a saved model from a given path
+    Args:
+        filepath: directory of saved model
+    Returns:
+        model saved
+    """
+    print("Loading and building model from directory {}".format(filepath))
+
+    checkpoint = torch.load(filepath)
+    model = build_network(checkpoint['architecture'], checkpoint['hidden_units'])
+    model.load_state_dict(checkpoint['model_state_dict'])
+    model.class_to_idx = checkpoint['class_to_idx'] 
