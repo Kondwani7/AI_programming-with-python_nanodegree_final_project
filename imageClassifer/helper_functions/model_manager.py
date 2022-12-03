@@ -119,6 +119,47 @@ def train_network(model, epochs, learning_rate, trainloader, validloader, gpu):
 
                 model.train()
                 
-    print("Finished training network")
+    print("Finished training neural network")
     
     return model, criterion
+
+def evaluate_model(model, testloader, criterion, gpu):
+    """
+    Description:
+        Evaluates model performance
+    Args:
+        model: model being evaluated
+        testloader: test data
+        criterion: measure used to evaluate model performance
+        gpu: environment used to handle large data
+    """
+    print("Testing network ... gpu used for testing: {}".format(gpu))
+    
+    if gpu:
+        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    else:
+        device = torch.device("cpu")
+    #validation on test data
+    test_loss = 0
+    test_accuracy = 0
+    model.eval()
+    
+    with torch.no_grad():
+        for inputs, labels in testloader:
+            inputs, labels = inputs.to(device), labels.to(device)
+
+            logps = model.forward(inputs)
+            batch_loss = criterion(logps, labels)
+            test_loss += batch_loss.item()
+
+            # Calculate accuracy of test set
+            ps = torch.exp(logps)
+            top_p, top_class = ps.topk(1, dim=1)
+            equals = top_class == labels.view(*top_class.shape)
+            test_accuracy += torch.mean(equals.type(torch.FloatTensor)).item()
+
+    print(f"Test loss: {test_loss/len(testloader):.3f}, "
+          f"Test accuracy: {test_accuracy/len(testloader):.3f}")
+    running_loss = 0
+    
+    print("Finished testing neural network.")
