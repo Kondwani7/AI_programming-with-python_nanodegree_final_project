@@ -44,3 +44,81 @@ def build_network(architecture, hidden_units):
     print("Completed building the neural network")
     
     return model
+
+def train_network(model, epochs, learning_rate, trainloader, validloader, gpu):
+    """
+    Descripiton:
+        trains a model based of given data
+    Args:
+        model: the model
+        epochs: the number of times it is trained to achieve a lower gradient descent
+        learning_rate: proposed rate at which the model descends
+        trainloader: train data
+        validloader: validation data
+        gpu: environment used to handle large data
+    Returns:
+        model - performance of the model
+        criterion - measure used to evaluate model performance
+    """
+    print("Training network ... epochs: {}, learning_rate: {}, gpu used for training: {}".format(epochs, learning_rate, gpu))
+    
+    if gpu:
+        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    else:
+        device = torch.device("cpu")
+
+    criterion = nn.NLLLoss()
+    optimizer = optim.Adam(model.classifier.parameters(), lr = learning_rate)
+
+    model.to(device)
+    #training our model
+    steps = 0
+    print_every = 10
+    train_loss = 0
+    #same as the notebook in the visualizer file
+    for epoch in range(epochs):
+        for inputs, labels in trainloader:
+            steps += 1
+            inputs, labels = inputs.to(device), labels.to(device)
+
+            optimizer.zero_grad()
+
+            logps = model.forward(inputs)
+            loss = criterion(logps, labels)
+            loss.backward()
+            optimizer.step()
+
+            train_loss += loss.item()
+
+            if steps % print_every == 0:
+                valid_loss = 0
+                valid_accuracy = 0
+
+                model.eval()
+
+                with torch.no_grad():
+                    for inputs, labels in validloader:
+                        inputs, labels = inputs.to(device), labels.to(device)
+
+                        logps = model.forward(inputs)
+                        batch_loss = criterion(logps, labels)
+                        valid_loss += batch_loss.item()
+
+                        # Calculate validation acc
+                        ps = torch.exp(logps)
+                        top_p, top_class = ps.topk(1, dim=1)
+                        equals = top_class == labels.view(*top_class.shape)
+                        valid_accuracy += torch.mean(equals.type(torch.FloatTensor)).item()
+
+                print(f"Epoch {epoch+1}/{epochs}, "
+                      f"Train loss: {train_loss/print_every:.3f}, "
+                      f"Valid loss: {valid_loss/len(validloader):.3f}, "
+                      f"Valid accuracy: {valid_accuracy/len(validloader):.3f}")
+
+                train_loss = 0
+
+                model.train()
+                
+    print("Finished training network")
+    
+    return model, criterion
