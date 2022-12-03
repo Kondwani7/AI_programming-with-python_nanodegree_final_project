@@ -207,3 +207,31 @@ def load_model(filepath):
     model = build_network(checkpoint['architecture'], checkpoint['hidden_units'])
     model.load_state_dict(checkpoint['model_state_dict'])
     model.class_to_idx = checkpoint['class_to_idx'] 
+
+
+def predict(processed_image, model, topk):
+    """
+    Description:
+        based on a given image, predict the flower category it belows two with the model
+    Args:
+        processed_image: image used  for prediction
+        model: model being used
+        topk: top k classes
+    Returns:
+        the probability of a image belonging to a given flower class
+    """
+    model.eval()
+    
+    with torch.no_grad():
+        logps = model.forward(processed_image.unsqueeze(0))
+        ps = torch.exp(logps)
+        probs, labels = ps.topk(topk, dim=1)
+        
+        class_to_idx_inv = {model.class_to_idx[i]: i for i in model.class_to_idx}
+        classes = list()
+    
+        for label in labels.numpy()[0]:
+            classes.append(class_to_idx_inv[label])
+        
+        return probs.numpy()[0], 
+    
