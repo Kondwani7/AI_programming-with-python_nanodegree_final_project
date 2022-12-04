@@ -1,5 +1,5 @@
 # Project: AI Programming with Python Nanodegree
-![Interface](https://napaanalytics.com/wp-content/uploads/2020/04/Napa-Data-Engineering-Image.jpg)
+![Interface](https://github.com/Kondwani7/AI_programming-with-python_nanodegree_final_project/blob/main/img/aiml_scholarship_program_featured.png)
 ## Table of Contents
 - Summary
 - considerations
